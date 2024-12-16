@@ -7,13 +7,16 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "antd": "^5.7.0",
+    "aos": "^2.3.4",
     "apexcharts": "^4.2.0",
+    "chart.js": "^4.4.7",
     "firebase": "^10.0.0",
     "gh-pages": "^5.0.0",
     "moment": "^2.29.4",
     "papaparse": "^5.4.1",
     "react": "^18.2.0",
     "react-apexcharts": "^1.7.0",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
     "react-icons": "^4.10.1",
@@ -47,5 +50,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.16"
   }
 }

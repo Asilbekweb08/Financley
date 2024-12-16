@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Cards from "../components/Cards";
-import Modal from "antd/es/modal/Modal";
+import { Modal } from "antd";
 import AddExpense from "../components/Modals/addExpense";
 import AddIncome from "../components/Modals/addIncome";
 import { toast } from "react-toastify";
@@ -9,16 +9,19 @@ import { addDoc, collection, getDocs, query } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import TransactionsTable from "../components/TransactionsTable";
 import ChartComponent from "../components/Charts";
+import ExchangeRate from "./exChange";
+import { CurrencyContext } from "../context/currentContext.js";
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
   const [isIncomeModalVisible, setIsIncomeModalVisible] = useState(false);
-  // all trasactions storing this array after that fetching into doc
   const [transactions, setTransactions] = useState([]);
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
   const [currentBalance, setCurrentBalance] = useState(0);
+
+  const { selectedCurrency, rates } = useContext(CurrencyContext);
 
   const showExpenseModal = () => {
     setIsExpenseModalVisible(true);
@@ -36,7 +39,6 @@ const Dashboard = () => {
     setIsIncomeModalVisible(false);
   };
 
-  // Adding a income and expense on the firebase new collection in diffrent uid
   const onFinish = (values, type) => {
     const newTransaction = {
       type: type,
@@ -57,7 +59,6 @@ const Dashboard = () => {
         transaction
       );
       if (!many) toast.success("Transaction Added!");
-      // adding new transaction after that previous transactions
       setTransactions([...transactions, transaction]);
       calculateBalance();
       fetchTransactions();
@@ -80,7 +81,6 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // get all the docs from collections
     fetchTransactions();
   }, [user]);
 
@@ -88,7 +88,10 @@ const Dashboard = () => {
     calculateBalance();
   }, [transactions]);
 
-  // Calculate the inital FaBalanceScale, income and expenses
+  useEffect(() => {
+    calculateBalance();
+  }, [selectedCurrency, transactions]);
+
   const calculateBalance = () => {
     let totalIncome = 0;
     let totalExpense = 0;
@@ -100,9 +103,15 @@ const Dashboard = () => {
         totalExpense += parseFloat(transaction.amount);
       }
     });
-    setIncome(totalIncome);
-    setExpense(totalExpense);
-    setCurrentBalance(totalIncome - totalExpense);
+
+    const exchangeRate = rates[selectedCurrency] || 1;
+    const convertedIncome = totalIncome * exchangeRate;
+    const convertedExpense = totalExpense * exchangeRate;
+    const convertedBalance = (totalIncome - totalExpense) * exchangeRate;
+
+    setIncome(convertedIncome);
+    setExpense(convertedExpense);
+    setCurrentBalance(convertedBalance);
   };
 
   return (
@@ -113,6 +122,7 @@ const Dashboard = () => {
         income={income}
         expense={expense}
         currentBalance={currentBalance}
+        selectedCurrency={selectedCurrency}
       />
       <Modal open={isIncomeModalVisible} onCancel={handleIncomeCancel}>
         Income
@@ -130,22 +140,21 @@ const Dashboard = () => {
         handleIncomeCancel={handleIncomeCancel}
         onFinish={onFinish}
       />
-      <div className="chart container">
-        {transactions.length !== 0 ? (
-          <div className="line-chart">
-            <ChartComponent transactions={transactions} />
-          </div>
-        ) : (
-          <div className="no-transaction">
-            <h2>No Transactions Avalaible</h2>
-            <img
-              src={process.env.PUBLIC_URL + "/coin.gif"}
-              alt="No-transaction-img"
-            />
-          </div>
-        )}
+      <div className="flex justify-between items-center m-auto w-[95%] mt-8 rounded-[10px] bg-white" data-aos="fade-up">
+        <div className="w-1/2 pr-4 ">
+          <ChartComponent 
+            income={income}
+            expense={expense}
+            currentBalance={currentBalance} 
+            selectedCurrency={selectedCurrency}
+          />
+        </div>
+        <div className="w-1/2 pl-4">
+          <ExchangeRate />
+        </div>
       </div>
       <TransactionsTable
+        selectedCurrency={selectedCurrency}
         transactions={transactions}
         addTransaction={addTransaction}
         fetchTransactions={fetchTransactions}

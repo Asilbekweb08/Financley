@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <div className="App">
+    <div className="App bg-slate-200">
       <ToastContainer
         position="top-right"
         autoClose={3000}

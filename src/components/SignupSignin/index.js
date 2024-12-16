@@ -142,7 +142,7 @@ const SignupSignin = () => {
   return (
     <>
       {loginForm ? (
-        <div className="signup-wrapper">
+        <div className="signup-wrapper shadow-lg rounded-lg bg-white">
           <h2 className="title">
             Login up on{" "}
             <span style={{ color: "var(--primary-purple)" }}>Fanancley</span>
@@ -183,7 +183,7 @@ const SignupSignin = () => {
           </p>
         </div>
       ) : (
-        <div className="signup-wrapper">
+        <div className="signup-wrapper shadow-lg rounded-lg bg-white">
           <h2 className="title">
             Sign Up on{" "}
             <span style={{ color: "var(--primary-purple)" }}>Financely</span>

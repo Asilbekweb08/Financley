@@ -14,15 +14,16 @@ const TransactionsTable = ({
   transactions,
   addTransaction,
   fetchTransactions,
+  selectedCurrency
 }) => {
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("All");
   const [sortKey, setSortKey] = useState("");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [user] = useAuthState(auth);
 
-  //   define a columns for our table
+  
   const columns = [
     {
       title: "Name",
@@ -96,7 +97,7 @@ const TransactionsTable = ({
             const newTransaction = {
               ...transaction,
               // Convert the 'amount' field to a number using parseFloat instead of parseInt
-              amount: parseFloat(transaction.amount),
+              amount: parseFloat(transaction.amount+`${selectedCurrency}`),
             };
             // Write each transaction to Firebase (addDoc), you can use the addTransaction function here
             await addTransaction(newTransaction, true);
@@ -135,76 +136,76 @@ const TransactionsTable = ({
   };
 
   return (
-    <div className="table-box container">
-      <h2>My Transactions</h2>
-      <div className="search-and-filter container">
-        <AiOutlineSearch className="search-icon" />
-        <input
-          className="search-bar"
-          type="search"
-          value={search}
-          onChangeCapture={(e) => setSearch(e.target.value)}
-          placeholder="Search by name"
-          // className="custome-input search-bar"
-        />
-        <Select
-          className="search-bar select-filter"
-          onChange={(value) => setTypeFilter(value)}
-          value={typeFilter}
-          placeholder="Filter"
-          allowClear
-        >
-          <Select.Option value="">All</Select.Option>
-          <Select.Option value="income">Income</Select.Option>
-          <Select.Option value="expense">Expense</Select.Option>
-        </Select>
-      </div>
-      <div className="import-export-sort container">
-        <Radio.Group
-          className="input-radio"
-          onChange={(e) => setSortKey(e.target.value)}
-          value={sortKey}
-        >
-          <Radio.Button value="">No Sort</Radio.Button>
-          <Radio.Button value="date">Sort by Date</Radio.Button>
-          <Radio.Button value="amount">Sort by Amount</Radio.Button>
-        </Radio.Group>
-        <div className="ix-button">
-          <button className="btn  btn-purple" onClick={exportCSV}>
-            Export CSV
-          </button>
-          <label htmlFor="file-csv" className="btn">
-            Import CSV
-          </label>
-          <input
-            type="file"
-            id="file-csv"
-            accept=".csv"
-            required
-            onChange={importCSV}
-            style={{ display: "none" }}
-          />
-        </div>
-      </div>
-      <div className="table-container">
-        <Table
-          dataSource={sortedTransactions}
-          columns={columns}
-          className="table"
-          onRow={(record) => ({
-            onClick: () => handleEdit(record), // Handle row click event
-          })}
-        />
-        {showEditModal && selectedTransaction && (
-          <EditEditDeleteModal
-            transaction={selectedTransaction}
-            onSave={handleEditSave}
-            onDelete={handleDeleteSave}
-            onCancel={handleEditCancel}
-          />
-        )}
-      </div>
+    <div class="table-box container mx-auto p-6 bg-gray-100 rounded-lg shadow-lg max-w-[95%]">
+  <h2 class="text-2xl font-bold text-center text-gray-700 mb-4">My Transactions</h2>
+
+  <div class="search-and-filter flex flex-wrap items-center gap-4 mb-4">
+    <AiOutlineSearch class="text-gray-500 text-lg" />
+    <input
+      type="search"
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Search by name"
+      class="flex-grow p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <Select
+      onChange={(value) => setTypeFilter(value)}
+      value={typeFilter}
+      placeholder="Filter"
+      allowClear
+      class="min-w-[180px] border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <Select.Option value="">All</Select.Option>
+      <Select.Option value="income">Income</Select.Option>
+      <Select.Option value="expense">Expense</Select.Option>
+    </Select>
+  </div>
+
+  <div class="import-export-sort flex flex-wrap justify-between items-center mb-4 gap-4">
+    <Radio.Group
+      class="flex items-center gap-2 text-sm"
+      onChange={(e) => setSortKey(e.target.value)}
+      value={sortKey}
+    >
+      <Radio.Button class="p-2 rounded-md border" value="">No Sort</Radio.Button>
+      <Radio.Button class="p-2 rounded-md border" value="date">Sort by Date</Radio.Button>
+      <Radio.Button class="p-2 rounded-md border" value="amount">Sort by Amount</Radio.Button>
+    </Radio.Group>
+    <div class="flex gap-4">
+      <button class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 text-sm" onClick={exportCSV}>Export CSV</button>
+      <label htmlFor="file-csv" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm cursor-pointer">
+        Import CSV
+      </label>
+      <input
+        type="file"
+        id="file-csv"
+        accept=".csv"
+        class="hidden"
+        onChange={importCSV}
+      />
     </div>
+  </div>
+
+  <div class="table-container overflow-x-auto rounded-lg">
+    <Table
+      dataSource={sortedTransactions}
+      columns={columns}
+      class="w-full text-center border rounded-lg"
+      onRow={(record) => ({
+        onClick: () => handleEdit(record),
+      })}
+    />
+    {showEditModal && selectedTransaction && (
+      <EditEditDeleteModal
+        transaction={selectedTransaction}
+        onSave={handleEditSave}
+        onDelete={handleDeleteSave}
+        onCancel={handleEditCancel}
+      />
+    )}
+  </div>
+</div>
+
   );
 };
 
